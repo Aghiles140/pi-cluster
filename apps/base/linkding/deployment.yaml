@@ -13,21 +13,23 @@ spec:
         app: linkding
     spec:
       securityContext:
-        fsgroup: 33 #www-data groupID
-        runAsUser: 33 #www-data userID
-        runAsGroup: 33 #www-data groupID
+        fsGroup: 33 # www-data group ID
+        runAsUser: 33 # www-data user ID
+        runAsGroup: 33 # www-data group ID
+
       containers:
         - name: linkding
           image: sissbruecker/linkding:1.31.0
           ports:
             - containerPort: 9090
+
           securityContext:
             allowPrivilegeEscalation: false
+
           volumeMounts:
             - name: linkding-data
-              mountPath: etc/linkding/data
+              mountPath: /etc/linkding/data
       volumes:
         - name: linkding-data
           persistentVolumeClaim:
             claimName: linkding-data-pvc
-
