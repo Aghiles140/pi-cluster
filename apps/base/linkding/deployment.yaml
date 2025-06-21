@@ -12,12 +12,17 @@ spec:
       labels:
         app: linkding
     spec:
+      securityContext:
+        fsgroup: 33 #www-data groupID
+        runAsUser: 33 #www-data userID
+        runAsGroup: 33 #www-data groupID
       containers:
         - name: linkding
           image: sissbruecker/linkding:1.31.0
           ports:
             - containerPort: 9090
-
+          securityContext:
+            allowPrivilegeEscalation: false
           volumeMounts:
             - name: linkding-data
               mountPath: etc/linkding/data
