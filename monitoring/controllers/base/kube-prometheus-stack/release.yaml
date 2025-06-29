@@ -35,13 +35,13 @@ spec:
       ## Hostnames.
       ## Must be provided if Ingress is enable.
       ##
-     hosts:
-       - grs.aghileshamiti.com
+         hosts:
+           - grs.aghileshamiti.com
 
-    ## TLS configuration for grafana Ingress
-    ## Secret must be manually created in the namespace
-    ##
-    tls: []
-    # - secretName: grafana-general-tls
-    #   hosts:
-    #   - grafana.example.com
+          ## TLS configuration for grafana Ingress
+          ## Secret must be manually created in the namespace
+          ##
+         tls: []
+          # - secretName: grafana-general-tls
+            #   hosts:
+          #   - grafana.example.com
