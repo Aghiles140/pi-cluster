@@ -41,13 +41,13 @@ spec:
 #
           volumeMounts:
             - name: audiobookshelf-audiobooks
-              mountPath: /etc/audiobookshelf/audiobooks
+              mountPath: /audiobooks
             - name: audiobookshelf-podcasts
-              mountPath: /etc/audiobookshelf/podcasts
+              mountPath: /podcasts
             - name: audiobookshelf-config
-              mountPath: /etc/audiobookshelf/config
+              mountPath: /config
             - name: audiobookshelf-metadata
-              mountPath: /etc/audiobookshelf/metadata
+              mountPath: /metadata
 
       restartPolicy: Always
 
