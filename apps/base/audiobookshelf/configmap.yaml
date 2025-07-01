@@ -4,4 +4,4 @@ metadata:
   name: audiobookshelf-configmap
   namespace: audiobookshelf
 data:
-  RTZ: America/Toronto
+  PORT: "3005"
