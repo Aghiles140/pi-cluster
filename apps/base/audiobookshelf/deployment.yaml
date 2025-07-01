@@ -34,7 +34,7 @@ spec:
 
           ports:
             - containerPort: 3005
-              protocol: tcp
+              protocol: TCP
 #
 #          securityContext:
 #            allowPrivilegeEscalation: false
