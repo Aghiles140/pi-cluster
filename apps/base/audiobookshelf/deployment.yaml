@@ -39,26 +39,28 @@ spec:
 #          securityContext:
 #            allowPrivilegeEscalation: false
 #
-#          volumeMounts:
-#            - name: audiobookshelf-audiobooks
-#              mountPath: /etc/audiobookshelf/audiobooks
-#             - name: audiobookshelf-podcasts
-#              mountPath: /etc/audiobookshelf/podcasts
-#            - name: audiobookshelf-config
-#              mountPath: /etc/audiobookshelf/config
-#             - name: audiobookshelf-metadata
-#              mountPath: /etc/audiobookshelf/metadata
-#
-#      volumes:
-#        - name: audiobookshelf-audiobooks
-#          persistentVolumeClaim:
-#            claimName: audiobookshelf-audiobooks-pvc
-#        - name: audiobookshelf-podcasts
-#          persistentVolumeClaim:
-#            claimName: audiobookshelf-podcasts-pvc
-#        - name: audiobookshelf-config
-#          persistentVolumeClaim:
-#            claimName: audiobookshelf-config-pvc
-#        - name: audiobookshelf-metadata
-#          persistentVolumeClaim:
-#            claimName: audiobookshelf-metadata-pvc
+          volumeMounts:
+            - name: audiobookshelf-audiobooks
+              mountPath: /etc/audiobookshelf/audiobooks
+             - name: audiobookshelf-podcasts
+              mountPath: /etc/audiobookshelf/podcasts
+            - name: audiobookshelf-config
+              mountPath: /etc/audiobookshelf/config
+             - name: audiobookshelf-metadata
+              mountPath: /etc/audiobookshelf/metadata
+
+      restartPolicy: Always
+
+      volumes:
+        - name: audiobookshelf-audiobooks
+          persistentVolumeClaim:
+            claimName: audiobookshelf-audiobooks-pvc
+        - name: audiobookshelf-podcasts
+          persistentVolumeClaim:
+            claimName: audiobookshelf-podcasts-pvc
+        - name: audiobookshelf-config
+          persistentVolumeClaim:
+            claimName: audiobookshelf-config-pvc
+        - name: audiobookshelf-metadata
+          persistentVolumeClaim:
+            claimName: audiobookshelf-metadata-pvc
