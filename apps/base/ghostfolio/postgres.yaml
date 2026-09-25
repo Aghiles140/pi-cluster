@@ -1,0 +1,69 @@
+# PostgreSQL for Ghostfolio: your portfolio data lives here.
+# The major version is pinned on purpose. A major bump (15 -> 16+) can't read
+# the old data directory without a dump/restore, so renovate.json blocks
+# major updates for this image.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ghostfolio-postgres
+  template:
+    metadata:
+      labels:
+        app: ghostfolio-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          envFrom:
+            # Reads POSTGRES_DB / POSTGRES_USER / POSTGRES_PASSWORD, ignores the rest
+            - secretRef:
+                name: ghostfolio-env
+          env:
+            # Subdirectory so initdb never trips over files at the volume root
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"']
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["sh", "-c", 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"']
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector:
+    app: ghostfolio-postgres
+  ports:
+    - port: 5432
+  type: ClusterIP

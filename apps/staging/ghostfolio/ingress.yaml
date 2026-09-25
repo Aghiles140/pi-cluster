@@ -1,0 +1,21 @@
+# LAN-only on purpose: unlike Linkding and Audiobookshelf there is NO
+# cloudflared tunnel, so financial data is never published to the internet.
+# Remote access comes later through Tailscale.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ghostfolio
+  namespace: ghostfolio
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: gf.aghileshamiti.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: ghostfolio
+                port:
+                  number: 3333
+            path: /
+            pathType: Prefix

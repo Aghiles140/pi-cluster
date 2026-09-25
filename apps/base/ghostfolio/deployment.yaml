@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ghostfolio
+spec:
+  replicas: 1
+  strategy:
+    # Never run two versions at once: each start applies DB schema migrations
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ghostfolio
+  template:
+    metadata:
+      labels:
+        app: ghostfolio
+    spec:
+      initContainers:
+        # Wait for Postgres instead of crash-looping while it starts
+        - name: wait-for-postgres
+          image: postgres:15-alpine
+          command: ["sh", "-c", "until pg_isready -h postgres -p 5432; do echo waiting for postgres; sleep 3; done"]
+      containers:
+        - name: ghostfolio
+          image: ghostfolio/ghostfolio:3.72.0
+          envFrom:
+            # POSTGRES_*, DATABASE_URL, REDIS_PASSWORD, ACCESS_TOKEN_SALT, JWT_SECRET_KEY
+            - secretRef:
+                name: ghostfolio-env
+          env:
+            - name: REDIS_HOST
+              value: redis
+            - name: REDIS_PORT
+              value: "6379"
+            - name: PORT
+              value: "3333"
+            # Traefik sits in front, so trust one proxy hop for client IPs
+            - name: TRUST_PROXY
+              value: "1"
+          ports:
+            - containerPort: 3333
+          # First start runs all DB migrations: give it up to 5 minutes
+          startupProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 3333
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 3333
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 3333
+            periodSeconds: 30
+            failureThreshold: 3
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi

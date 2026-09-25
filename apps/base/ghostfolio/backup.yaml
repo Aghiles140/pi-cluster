@@ -1,0 +1,54 @@
+# Nightly pg_dump, 14 days kept. This guards against a bad migration or a
+# wrong delete, NOT against losing the disk: the dumps sit on the same node.
+# Once the NAS exists, point this PVC at NFS (or add Velero/k8up).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-backup-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+spec:
+  schedule: "30 3 * * *"
+  timeZone: Europe/Paris
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: pg-dump
+              image: postgres:15-alpine
+              envFrom:
+                - secretRef:
+                    name: ghostfolio-env
+              command:
+                - sh
+                - -c
+                - |
+                  set -e
+                  export PGPASSWORD="$POSTGRES_PASSWORD"
+                  f="/backup/ghostfolio-$(date +%Y%m%d-%H%M).sql.gz"
+                  pg_dump -h postgres -U "$POSTGRES_USER" -d "$POSTGRES_DB" | gzip > "$f.tmp"
+                  mv "$f.tmp" "$f"
+                  find /backup -name 'ghostfolio-*.sql.gz' -mtime +14 -delete
+                  ls -lh /backup
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: postgres-backup-pvc
