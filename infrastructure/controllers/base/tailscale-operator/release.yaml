@@ -1,0 +1,37 @@
+# Tailscale Kubernetes operator: gives cluster Services a private HTTPS name on
+# the tailnet (https://<name>.<tailnet>.ts.net) without an ingress controller
+# or any open port.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tailscale-operator
+  namespace: tailscale
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: tailscale-operator
+      # Pinned: upgrades go through a reviewed PR, never silently.
+      # The chart version equals the Tailscale release (tag without the "v").
+      version: "1.102.5"
+      sourceRef:
+        kind: HelmRepository
+        name: tailscale
+        namespace: tailscale
+      interval: 12h
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    # No oauth.clientId / clientSecret here on purpose: they would sit in git
+    # in plain text. The chart then reads the pre-created Secret
+    # "operator-oauth" (keys client_id, client_secret) from this namespace,
+    # which we ship SOPS-encrypted in the staging overlay.
+    operatorConfig:
+      # Name of the operator's own machine in the Tailscale admin console
+      hostname: zeus-k8s-operator
+    # CRDs ship as regular chart templates (installCRDs: true by default), so
+    # they are upgraded together with the operator: no CRD/controller drift.

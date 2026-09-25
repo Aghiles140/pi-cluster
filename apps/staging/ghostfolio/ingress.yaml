@@ -1,21 +1,20 @@
-# LAN-only on purpose: unlike Linkding and Audiobookshelf there is NO
-# cloudflared tunnel, so financial data is never published to the internet.
-# Remote access comes later through Tailscale.
+# Private HTTPS access through the Tailscale operator:
+#   https://ghostfolio.<your-tailnet>.ts.net
+# Reachable only from devices logged into your tailnet. No port is opened on
+# the router and nothing appears in public DNS. The certificate is issued and
+# renewed by Tailscale (MagicDNS + HTTPS must be enabled on the tailnet).
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ghostfolio
   namespace: ghostfolio
 spec:
-  ingressClassName: traefik
-  rules:
-    - host: gf.aghileshamiti.com
-      http:
-        paths:
-          - backend:
-              service:
-                name: ghostfolio
-                port:
-                  number: 3333
-            path: /
-            pathType: Prefix
+  ingressClassName: tailscale
+  defaultBackend:
+    service:
+      name: ghostfolio
+      port:
+        number: 3333
+  tls:
+    - hosts:
+        - ghostfolio
