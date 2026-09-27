@@ -20,7 +20,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: redis
-          image: redis:7.4-alpine
+          image: redis:8.10-alpine
           command: ["sh", "-c", 'exec redis-server --requirepass "$REDIS_PASSWORD"']
           env:
             - name: REDIS_PASSWORD
