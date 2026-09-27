@@ -22,7 +22,7 @@ spec:
           command: ["sh", "-c", "until pg_isready -h postgres -p 5432; do echo waiting for postgres; sleep 3; done"]
       containers:
         - name: ghostfolio
-          image: ghostfolio/ghostfolio:3.72.0
+          image: ghostfolio/ghostfolio:3.74.0
           envFrom:
             # POSTGRES_*, DATABASE_URL, REDIS_PASSWORD, ACCESS_TOKEN_SALT, JWT_SECRET_KEY
             - secretRef:
